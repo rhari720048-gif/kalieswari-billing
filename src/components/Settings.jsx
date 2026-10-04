@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Store, Phone, MapPin, Receipt, CheckCircle, Calendar, Plus, Trash2, AlertTriangle } from 'lucide-react';
-import { getFinancialYears, saveFinancialYear, deleteFinancialYear, getShopSettings, saveShopSettings } from '../utils/storage';
+import { Save, Store, Phone, MapPin, Receipt, CheckCircle, Calendar, Plus, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { getFinancialYears, saveFinancialYear, deleteFinancialYear, getShopSettings, saveShopSettings, resetYearData } from '../utils/storage';
 
-export default function Settings({ onUpdateShopSettings }) {
+export default function Settings({ onUpdateShopSettings, financialYear = '2026', onResetSuccess }) {
   const [initialSettings] = useState(() => getShopSettings());
   const [shopName, setShopName] = useState(initialSettings.shopName);
   const [phone, setPhone] = useState(initialSettings.phone);
@@ -15,6 +15,7 @@ export default function Settings({ onUpdateShopSettings }) {
   const [newYearInput, setNewYearInput] = useState('');
   const [yearSuccessMsg, setYearSuccessMsg] = useState('');
   const [yearToDelete, setYearToDelete] = useState(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -48,6 +49,16 @@ export default function Settings({ onUpdateShopSettings }) {
     setYearsList(updated);
     setYearToDelete(null);
     setYearSuccessMsg(`Financial Year ${yearToDelete} deleted successfully!`);
+    setTimeout(() => setYearSuccessMsg(''), 4000);
+  };
+
+  const handleConfirmResetYearData = () => {
+    resetYearData(financialYear);
+    setShowResetConfirmModal(false);
+    if (onResetSuccess) {
+      onResetSuccess();
+    }
+    setYearSuccessMsg(`Financial Year ${financialYear} billing data reset successfully!`);
     setTimeout(() => setYearSuccessMsg(''), 4000);
   };
 
@@ -189,6 +200,71 @@ export default function Settings({ onUpdateShopSettings }) {
           </button>
         </form>
       </div>
+
+      {/* 3. RESET FINANCIAL YEAR BILLING DATA CARD */}
+      <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <RotateCcw size={20} color="#dc2626" />
+          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+            Reset Financial Year Data (நிதி ஆண்டு டேட்டா ரீசெட்)
+          </h3>
+        </div>
+        <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+          Clear all bill invoices, sales history, and dashboard reports for Financial Year <strong style={{ color: '#0f172a' }}>{financialYear}</strong>. Saved products & regular customers remain 100% safe.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => setShowResetConfirmModal(true)}
+          style={{
+            padding: '10px 18px',
+            background: '#fef2f2',
+            color: '#dc2626',
+            border: '1.5px solid #fecdd3',
+            borderRadius: '8px',
+            fontWeight: 700,
+            fontSize: '13px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 1px 2px rgba(220, 38, 38, 0.05)'
+          }}
+        >
+          <RotateCcw size={15} /> Reset FY {financialYear} Data
+        </button>
+      </div>
+
+      {/* SCREEN CENTER CONFIRMATION TOAST MODAL FOR RESETTING FINANCIAL YEAR DATA */}
+      {showResetConfirmModal && (
+        <div className="modal-overlay" style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(3px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#ffffff', padding: '26px 28px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', width: '90%', maxWidth: '420px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
+            <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px auto', border: '1px solid #fecdd3' }}>
+              <AlertTriangle size={26} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>Are you sure?</h3>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+              Are you sure you want to reset all billing history & sales counts for <strong style={{ color: '#0f172a' }}>Financial Year {financialYear}</strong>? Saved products and customers will NOT be deleted.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setShowResetConfirmModal(false)}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmResetYearData}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: '#ffffff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)' }}
+              >
+                Yes, Reset Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SCREEN CENTER CONFIRMATION TOAST MODAL FOR DELETING FINANCIAL YEAR */}
       {yearToDelete && (

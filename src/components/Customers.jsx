@@ -97,30 +97,30 @@ export default function Customers({ customers = [], onAddCustomer, onSelectCusto
           <table className="cart-items-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>CUSTOMER NAME</th>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>MOBILE NUMBER</th>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>CITY / ADDRESS</th>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>TOTAL BILLED (₹)</th>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>TOTAL BILLS</th>
-                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', textAlign: 'right' }}>ACTIONS</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', minWidth: '160px' }}>CUSTOMER NAME</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap' }}>MOBILE NUMBER</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', minWidth: '160px', maxWidth: '240px' }}>CITY / ADDRESS</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap' }}>TOTAL BILLED (₹)</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap' }}>TOTAL BILLS</th>
+                <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 700, color: '#475569', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((c, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '14px', fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>
+                    <td style={{ padding: '14px', fontWeight: 700, color: '#0f172a', fontSize: '14px', minWidth: '160px' }}>
                       {c.name}
                     </td>
-                    <td style={{ padding: '14px' }}>
+                    <td style={{ padding: '14px', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0f172a', fontWeight: 600, fontSize: '13px' }}>
                         <Phone size={14} color="#991b1b" /> {c.phone}
                       </div>
                     </td>
-                    <td style={{ padding: '14px', color: '#475569', fontSize: '13px', maxWidth: '280px' }}>
+                    <td style={{ padding: '14px', color: '#475569', fontSize: '13px', minWidth: '160px', maxWidth: '240px', whiteSpace: 'normal', wordBreak: 'break-word', wordWrap: 'break-word' }}>
                       {c.city || '-'}
                     </td>
-                    <td style={{ padding: '14px', fontWeight: 800, color: '#991b1b', fontSize: '14px' }}>
+                    <td style={{ padding: '14px', fontWeight: 800, color: '#991b1b', fontSize: '14px', whiteSpace: 'nowrap' }}>
                       ₹{(c.total_billed || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td style={{ padding: '14px' }}>

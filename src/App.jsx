@@ -272,7 +272,11 @@ export default function App() {
           )}
 
           {activeTab === 'settings' && (
-            <Settings onUpdateShopSettings={(updated) => setShopSettings(updated)} />
+            <Settings 
+              financialYear={financialYear}
+              onUpdateShopSettings={(updated) => setShopSettings(updated)} 
+              onResetSuccess={refreshData}
+            />
           )}
         </main>
       </div>

@@ -191,6 +191,17 @@ app.delete('/api/bills/:id', async (req, res) => {
   }
 });
 
+// Reset bills for a specific financial year (Keep products & customers safe!)
+app.delete('/api/bills/reset/:year', async (req, res) => {
+  try {
+    const year = req.params.year;
+    await pool.query('DELETE FROM bills WHERE created_at LIKE ? OR created_at LIKE ?', [`%${year}%`, `%/${year}%`]);
+    res.json({ success: true, year });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Dashboard stats
 app.get('/api/dashboard-stats', async (req, res) => {
   try {

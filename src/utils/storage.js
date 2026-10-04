@@ -347,3 +347,19 @@ export const saveShopSettings = (settings) => {
   return formatted;
 };
 
+export const resetYearData = (year) => {
+  const yearStr = String(year).trim();
+  const bills = getBills();
+  const remainingBills = bills.filter(b => {
+    const dateString = b.created_at || b.bill_date || '';
+    return !dateString.includes(yearStr);
+  });
+  localStorage.setItem(KEYS.BILLS, JSON.stringify(remainingBills));
+
+  fetchAPI(`/bills/reset/${yearStr}`, { method: 'DELETE' }).then(() => {
+    getBillsAsync();
+  });
+
+  return remainingBills;
+};
+
