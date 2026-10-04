@@ -226,20 +226,6 @@ export default function App() {
               <Calendar size={15} color="#dc2626" />
               <span>FY: <strong>{financialYear}</strong></span>
             </div>
-
-            <div className="shop-badge" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px' }}>
-              <img src="/logo.png" alt="Sri Kalieswari Logo" style={{ height: '24px', width: 'auto', objectFit: 'contain' }} />
-              <span style={{ 
-                fontWeight: 900, 
-                color: '#dc2626', 
-                fontFamily: "'Cinzel', 'Playfair Display', 'Georgia', serif",
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.3px'
-              }}>
-                {shopSettings.shopName || 'Sri Kalieswari Crackers'}
-              </span>
-            </div>
           </div>
         </header>
 
