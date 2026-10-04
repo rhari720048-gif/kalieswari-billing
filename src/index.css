@@ -903,7 +903,7 @@ body {
   width: 100vw;
   height: 100vh;
   background: rgba(0,0,0,0.5);
-  z-index: 45;
+  z-index: 998;
 }
 
 @media (max-width: 768px) {
@@ -915,6 +915,7 @@ body {
     top: 0;
     left: 0;
     height: 100vh;
+    z-index: 999 !important;
     transform: translateX(-100%);
   }
   .sidebar.open {
@@ -922,6 +923,7 @@ body {
   }
   .mobile-overlay.open {
     display: block;
+    z-index: 998 !important;
   }
   .content-body {
     padding: 16px;

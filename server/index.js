@@ -263,6 +263,10 @@ app.post('/api/settings', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 API Server running on http://localhost:${PORT} with TiDB Cloud connection`);
-});
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 API Server running on http://localhost:${PORT} with TiDB Cloud connection`);
+  });
+}
+
+export default app;
