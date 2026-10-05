@@ -244,7 +244,7 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
   };
 
   const downloadPDF = async () => {
-    const sourceEl = document.getElementById('modal-invoice-document') || document.getElementById('live-invoice-document') || document.querySelector('.printable-invoice');
+    const sourceEl = (completedBill && document.getElementById('modal-invoice-document')) || document.getElementById('live-invoice-document') || document.querySelector('.printable-invoice');
     if (!sourceEl) return;
 
     // Create temporary offscreen container with fixed A4 width (800px) so html2canvas never crops the right side or bottom!
@@ -822,12 +822,13 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
         </div>
 
         {/* Right Side: Live Invoice Preview Bill */}
-        <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className={showReceiptModal ? "no-print" : ""} style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', margin: '0 0 12px 0' }}>
             Live Invoice Preview
           </h3>
 
           <InvoiceDocument
+            id="live-invoice-document"
             billNo={billNo}
             billDate={`${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`}
             customerName={customerName}
@@ -859,6 +860,7 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
             </div>
 
             <InvoiceDocument
+              id="modal-invoice-document"
               billNo={completedBill.bill_no}
               billDate={completedBill.created_at || `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`}
               customerName={completedBill.customer_name}

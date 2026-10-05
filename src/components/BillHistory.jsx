@@ -15,7 +15,7 @@ export default function BillHistory({ bills = [] }) {
   );
 
   const downloadPDF = async () => {
-    const sourceEl = document.querySelector('.printable-invoice');
+    const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
     if (!sourceEl || !selectedBill) return;
 
     const container = document.createElement('div');
@@ -208,6 +208,7 @@ export default function BillHistory({ bills = [] }) {
             </div>
 
             <InvoiceDocument
+              id="history-modal-invoice-document"
               billNo={selectedBill.bill_no}
               billDate={selectedBill.created_at || 'Recent'}
               customerName={selectedBill.customer_name}

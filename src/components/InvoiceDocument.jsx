@@ -3,6 +3,7 @@ import { CheckCircle, Sparkles, Phone } from 'lucide-react';
 import { getShopSettings } from '../utils/storage';
 
 export default function InvoiceDocument({ 
+  id,
   billNo = 'INV-01',
   billDate = new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
   customerName = 'Walk-in Customer',
@@ -23,7 +24,7 @@ export default function InvoiceDocument({
   const formattedNetTotal = Math.round(grandTotal);
 
   return (
-    <div className="invoice-document printable-invoice" style={{
+    <div id={id} className="invoice-document printable-invoice" style={{
       background: '#ffffff',
       borderRadius: '0px',
       border: 'none',
