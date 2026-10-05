@@ -1,0 +1,16 @@
+{
+  "short_name": "Kalieswari",
+  "name": "Kalieswari Crackers - Billing Software",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "display": "standalone"
+}
