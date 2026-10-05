@@ -1099,7 +1099,7 @@ body {
     margin: 0mm !important;
   }
 
-  /* Reset all parent containers so they do NOT restrict print height or force 1 page */
+  /* Reset all parent containers & modal overlays so flex centering is disabled during print */
   html, 
   body, 
   #root, 
@@ -1118,9 +1118,15 @@ body {
     max-height: none !important;
     overflow: visible !important;
     position: static !important;
+    display: block !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
     box-shadow: none !important;
     border: none !important;
     transform: none !important;
+    inset: auto !important;
+    top: 0 !important;
+    left: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -1161,15 +1167,15 @@ body {
     visibility: hidden !important;
   }
 
-  /* 5. Printable Invoice starts IMMEDIATELY at the absolute top edge of paper */
+  /* 5. Position printable-invoice at absolute top 0 of paper */
   .printable-invoice {
-    position: relative !important;
-    left: auto !important;
+    position: absolute !important;
+    left: 0 !important;
     top: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto !important;
-    padding: 4mm 8mm 6mm 8mm !important;
+    margin: 0 !important;
+    padding: 2mm 8mm 6mm 8mm !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -1181,12 +1187,12 @@ body {
     break-inside: auto !important;
   }
 
-  /* Start brand logo right at the top edge */
+  /* Start brand logo right at the top edge without top margin */
   .printable-invoice > div:first-child {
     margin-top: 0 !important;
     padding-top: 0 !important;
-    padding-bottom: 12px !important;
-    margin-bottom: 14px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
   }
 
   .printable-invoice table {
