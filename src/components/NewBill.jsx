@@ -196,6 +196,27 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
     setCart(updated);
   };
 
+  const handleCartQtyChange = (code, valStr) => {
+    const val = parseInt(valStr, 10);
+    const updated = cart.map(item => {
+      if (item.code === code) {
+        return { ...item, quantity: isNaN(val) ? 0 : Math.max(0, val) };
+      }
+      return item;
+    });
+    setCart(updated);
+  };
+
+  const handleCartQtyBlur = (code) => {
+    const updated = cart.map(item => {
+      if (item.code === code) {
+        return { ...item, quantity: item.quantity <= 0 ? 1 : item.quantity };
+      }
+      return item;
+    });
+    setCart(updated);
+  };
+
   const removeFromCart = (code) => {
     setCart(cart.filter(item => item.code !== code));
   };
@@ -237,6 +258,17 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
     setCompletedBill(saved);
     setShowReceiptModal(true);
     if (onBillCreated) onBillCreated();
+
+    // Reset Invoice Items cart & customer fields immediately after saving
+    setCart([]);
+    setCustomerName('');
+    setCustomerPhone('');
+    setCustomerAddress('');
+    setCustomerSearchQuery('');
+    setGstin('');
+    setItemQuantities({});
+    setSearchQuery('');
+    setSelectedCategory('All');
 
     // Auto-trigger print dialog with the exact Live Invoice document design
     setTimeout(() => {
@@ -826,9 +858,28 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
                         <td style={{ color: '#ef4444', fontWeight: 700, whiteSpace: 'nowrap', textAlign: 'center' }}>{item.discount_percent}%</td>
                         <td style={{ fontWeight: 700, whiteSpace: 'nowrap', textAlign: 'right' }}>₹{Math.round(item.price)}</td>
                         <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                             <button className="qty-btn" onClick={() => updateQuantity(item.code, -1)}>-</button>
-                            <span style={{ fontWeight: 700, minWidth: '18px', textAlign: 'center' }}>{item.quantity}</span>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity === 0 ? '' : item.quantity}
+                              onFocus={e => e.target.select()}
+                              onChange={e => handleCartQtyChange(item.code, e.target.value)}
+                              onBlur={() => handleCartQtyBlur(item.code)}
+                              style={{
+                                width: '54px',
+                                padding: '3px 4px',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '6px',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                textAlign: 'center',
+                                outline: 'none',
+                                color: '#0f172a',
+                                background: '#ffffff'
+                              }}
+                            />
                             <button className="qty-btn" onClick={() => updateQuantity(item.code, 1)}>+</button>
                           </div>
                         </td>
