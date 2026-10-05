@@ -109,16 +109,17 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, isOpe
         </div>
 
         {/* User Footer */}
-        <div className="sidebar-user">
-          <div className="user-info">
-            <div className="user-avatar">
+        <div className="sidebar-user" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '14px 16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', background: 'var(--sidebar-bg)', width: '100%', boxSizing: 'border-box', flexShrink: 0 }}>
+          <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+            <div className="user-avatar" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#dc2626', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0 }}>
               {user?.name ? user.name.charAt(0) : 'K'}
             </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div className="user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Kalieswari Admin'}</div>
-              <div className="user-role">{user?.role || 'Admin / Cashier'}</div>
+            <div style={{ overflow: 'hidden', flex: 1, minWidth: 0 }}>
+              <div className="user-name" style={{ fontSize: '13px', fontWeight: 700, color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Kalieswari Admin'}</div>
+              <div className="user-role" style={{ fontSize: '11px', color: '#94a3b8' }}>{user?.role || 'Admin / Cashier'}</div>
             </div>
           </div>
+
           <button 
             type="button"
             className="logout-btn" 
@@ -128,21 +129,24 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, isOpe
             }} 
             title="Logout"
             style={{
+              width: '100%',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '7px 12px',
+              justify: 'center',
+              gap: '8px',
+              padding: '9px 12px',
               background: '#fef2f2',
               border: '1px solid #fecdd3',
               color: '#dc2626',
               borderRadius: '8px',
               fontWeight: 800,
-              fontSize: '12px',
+              fontSize: '13px',
               cursor: 'pointer',
-              flexShrink: 0
+              boxSizing: 'border-box',
+              transition: 'all 0.2s ease'
             }}
           >
-            <LogOut size={15} color="#dc2626" />
+            <LogOut size={16} color="#dc2626" />
             <span>Logout</span>
           </button>
         </div>
