@@ -243,7 +243,7 @@ export default function InvoiceDocument({
       </div>
 
       {/* 5. PAYMENT SUMMARY & NOTES GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', marginBottom: '28px' }}>
+      <div className="invoice-summary-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', marginBottom: '28px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
         
         {/* Payment Summary Box */}
         <div style={{ background: '#fef2f2', borderRadius: '12px', padding: '18px 20px', border: '1px solid #fecdd3' }}>
@@ -282,7 +282,7 @@ export default function InvoiceDocument({
       </div>
 
       {/* 6. FOOTER */}
-      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="invoice-footer-section" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
         <div>
           <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '20px', fontWeight: 700, color: '#dc2626' }}>
             Thank You!
