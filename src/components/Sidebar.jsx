@@ -114,13 +114,36 @@ export default function Sidebar({ activeTab, setActiveTab, user, onLogout, isOpe
             <div className="user-avatar">
               {user?.name ? user.name.charAt(0) : 'K'}
             </div>
-            <div>
-              <div className="user-name">{user?.name || 'Kalieswari Admin'}</div>
+            <div style={{ overflow: 'hidden' }}>
+              <div className="user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'Kalieswari Admin'}</div>
               <div className="user-role">{user?.role || 'Admin / Cashier'}</div>
             </div>
           </div>
-          <button className="logout-btn" onClick={onLogout} title="Logout">
-            <LogOut size={18} />
+          <button 
+            type="button"
+            className="logout-btn" 
+            onClick={() => {
+              if (onLogout) onLogout();
+              if (setIsOpen) setIsOpen(false);
+            }} 
+            title="Logout"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 12px',
+              background: '#fef2f2',
+              border: '1px solid #fecdd3',
+              color: '#dc2626',
+              borderRadius: '8px',
+              fontWeight: 800,
+              fontSize: '12px',
+              cursor: 'pointer',
+              flexShrink: 0
+            }}
+          >
+            <LogOut size={15} color="#dc2626" />
+            <span>Logout</span>
           </button>
         </div>
       </aside>
