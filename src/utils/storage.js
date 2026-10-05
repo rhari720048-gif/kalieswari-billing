@@ -207,6 +207,7 @@ export const getCustomersAsync = async () => {
 export const saveCustomer = (cust) => {
   const customers = getCustomers();
   const newCust = {
+    id: cust.id || Date.now(),
     name: cust.name,
     phone: cust.phone || '',
     city: cust.city || '',
@@ -230,11 +231,15 @@ export const saveCustomer = (cust) => {
 };
 
 export const deleteCustomer = (idOrPhoneOrName) => {
-  const customers = getCustomers().filter(c => 
-    c.id !== idOrPhoneOrName && 
-    c.phone !== idOrPhoneOrName && 
-    c.name !== idOrPhoneOrName
-  );
+  if (!idOrPhoneOrName) return getCustomers();
+  const targetStr = String(idOrPhoneOrName).trim().toLowerCase();
+
+  const customers = getCustomers().filter(c => {
+    const matchId = c.id !== undefined && c.id !== null && String(c.id) === String(idOrPhoneOrName);
+    const matchPhone = c.phone && String(c.phone).trim() === String(idOrPhoneOrName).trim();
+    const matchName = c.name && String(c.name).trim().toLowerCase() === targetStr;
+    return !matchId && !matchPhone && !matchName;
+  });
   localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
 
   fetchAPI(`/customers/${encodeURIComponent(idOrPhoneOrName)}`, { method: 'DELETE' }).then(() => {

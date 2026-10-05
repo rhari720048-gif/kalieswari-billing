@@ -153,14 +153,22 @@ export default function App() {
     setProducts(updated);
   };
 
-  const handleAddCustomer = (newCust) => {
+  const handleAddCustomer = async (newCust) => {
     const updated = saveCustomer(newCust);
     setRawCustomers(updated);
+    const liveCusts = await getCustomersAsync();
+    if (liveCusts && Array.isArray(liveCusts)) {
+      setRawCustomers(liveCusts);
+    }
   };
 
-  const handleDeleteCustomer = (idOrPhoneOrName) => {
+  const handleDeleteCustomer = async (idOrPhoneOrName) => {
     const updated = deleteCustomer(idOrPhoneOrName);
     setRawCustomers(updated);
+    const liveCusts = await getCustomersAsync();
+    if (liveCusts && Array.isArray(liveCusts)) {
+      setRawCustomers(liveCusts);
+    }
   };
 
   const handleDeleteBill = (idOrBillNo) => {
