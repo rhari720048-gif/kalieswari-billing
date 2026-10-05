@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Printer, Eye, Phone, Calendar, X, Receipt, CheckCircle, FileText, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, Printer, Eye, Phone, Calendar, X, Receipt, CheckCircle, FileText, Trash2, AlertTriangle, MessageSquare } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import InvoiceDocument from './InvoiceDocument';
+import { getShopSettings } from '../utils/storage';
 
 export default function BillHistory({ bills = [], onDeleteBill }) {
   const [search, setSearch] = useState('');
@@ -61,6 +62,104 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
       if (document.body.contains(container)) document.body.removeChild(container);
       console.error('Error generating PDF:', err);
     }
+  };
+
+  const shareWhatsApp = async (billToShare) => {
+    const bill = billToShare || selectedBill;
+    if (!bill) return;
+
+    const rawPhone = (bill.customer_phone || '').replace(/\D/g, '');
+    let formattedPhone = rawPhone;
+    if (rawPhone.length === 10) {
+      formattedPhone = '91' + rawPhone;
+    }
+
+    const shopSettings = getShopSettings();
+    const shopName = shopSettings.shopName || 'Kalieswari Crackers & Fireworks';
+    const billNo = bill.bill_no || '';
+    const custName = bill.customer_name || 'Walk-in Customer';
+    const grandTotal = Number(bill.grand_total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const itemsCount = bill.items ? bill.items.length : 0;
+    const billDate = bill.created_at || 'Recent';
+
+    let messageText = `*${shopName}*\n`;
+    messageText += `------------------------------------\n`;
+    messageText += `🧾 *INVOICE / BILL RECEIPT*\n`;
+    messageText += `*Bill No:* ${billNo}\n`;
+    messageText += `*Date:* ${billDate}\n`;
+    messageText += `*Customer:* ${custName}\n`;
+    messageText += `*Total Items:* ${itemsCount}\n`;
+    messageText += `*Net Total Amount:* ₹${grandTotal}\n`;
+    messageText += `*Payment Mode:* ${bill.payment_mode || 'Cash'}\n`;
+    messageText += `*Status:* ${bill.status || 'Paid'}\n`;
+    messageText += `------------------------------------\n`;
+    messageText += `Thank you for your business! 🎉\n`;
+    if (shopSettings.phone) {
+      messageText += `For support, call: ${shopSettings.phone}`;
+    }
+
+    const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
+
+    if (sourceEl && navigator.share && navigator.canShare) {
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = '800px';
+      container.style.background = '#ffffff';
+      container.style.zIndex = '-9999';
+
+      const clone = sourceEl.cloneNode(true);
+      clone.style.width = '800px';
+      clone.style.maxWidth = '800px';
+      clone.style.margin = '0 auto';
+      clone.style.padding = '24px 28px';
+      clone.style.boxSizing = 'border-box';
+
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      try {
+        const canvas = await html2canvas(clone, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 800,
+          windowWidth: 800
+        });
+
+        document.body.removeChild(container);
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const pdfBlob = pdf.output('blob');
+        const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
+
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `Bill ${billNo}`,
+            text: messageText,
+            files: [file]
+          });
+          return;
+        }
+      } catch (err) {
+        if (document.body.contains(container)) document.body.removeChild(container);
+        console.log('Web Share fallback to wa.me URL:', err);
+      }
+    }
+
+    const waUrl = formattedPhone
+      ? `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(messageText)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+
+    window.open(waUrl, '_blank');
   };
 
   return (
@@ -258,6 +357,12 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
                 style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #dc2626', background: '#fef2f2', color: '#991b1b', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 <FileText size={16} /> Download PDF
+              </button>
+              <button 
+                onClick={() => shareWhatsApp(selectedBill)}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: '#ffffff', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(37, 211, 102, 0.3)' }}
+              >
+                <MessageSquare size={16} /> WhatsApp Share
               </button>
               <button 
                 onClick={() => setSelectedBill(null)} 

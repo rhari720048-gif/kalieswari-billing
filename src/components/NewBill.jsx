@@ -17,7 +17,8 @@ import {
   Wallet,
   Smartphone,
   Layers,
-  Plus
+  Plus,
+  MessageSquare
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import jsPDF from 'jspdf';
@@ -290,6 +291,104 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
       if (document.body.contains(container)) document.body.removeChild(container);
       console.error('Error generating PDF:', err);
     }
+  };
+
+  const shareWhatsApp = async (billToShare) => {
+    const bill = billToShare || completedBill;
+    if (!bill) return;
+
+    const rawPhone = (bill.customer_phone || customerPhone || '').replace(/\D/g, '');
+    let formattedPhone = rawPhone;
+    if (rawPhone.length === 10) {
+      formattedPhone = '91' + rawPhone;
+    }
+
+    const shopSettings = getShopSettings();
+    const shopName = shopSettings.shopName || 'Kalieswari Crackers & Fireworks';
+    const bNo = bill.bill_no || billNo;
+    const custName = bill.customer_name || customerName || 'Walk-in Customer';
+    const grandTotal = Number(bill.grand_total || totalNetPayable || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const itemsCount = bill.items ? bill.items.length : cart.length;
+    const billDateStr = bill.created_at || `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+
+    let messageText = `*${shopName}*\n`;
+    messageText += `------------------------------------\n`;
+    messageText += `🧾 *INVOICE / BILL RECEIPT*\n`;
+    messageText += `*Bill No:* ${bNo}\n`;
+    messageText += `*Date:* ${billDateStr}\n`;
+    messageText += `*Customer:* ${custName}\n`;
+    messageText += `*Total Items:* ${itemsCount}\n`;
+    messageText += `*Net Total Amount:* ₹${grandTotal}\n`;
+    messageText += `*Payment Mode:* ${paymentMode || bill.payment_mode || 'Cash'}\n`;
+    messageText += `*Status:* ${bill.status || 'Paid'}\n`;
+    messageText += `------------------------------------\n`;
+    messageText += `Thank you for your business! 🎉\n`;
+    if (shopSettings.phone) {
+      messageText += `For support, call: ${shopSettings.phone}`;
+    }
+
+    const sourceEl = document.getElementById('modal-invoice-document') || document.querySelector('.printable-invoice');
+
+    if (sourceEl && navigator.share && navigator.canShare) {
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = '800px';
+      container.style.background = '#ffffff';
+      container.style.zIndex = '-9999';
+
+      const clone = sourceEl.cloneNode(true);
+      clone.style.width = '800px';
+      clone.style.maxWidth = '800px';
+      clone.style.margin = '0 auto';
+      clone.style.padding = '24px 28px';
+      clone.style.boxSizing = 'border-box';
+
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      try {
+        const canvas = await html2canvas(clone, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: 800,
+          windowWidth: 800
+        });
+
+        document.body.removeChild(container);
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const pdfBlob = pdf.output('blob');
+        const file = new File([pdfBlob], `Bill_${bNo}.pdf`, { type: 'application/pdf' });
+
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: `Bill ${bNo}`,
+            text: messageText,
+            files: [file]
+          });
+          return;
+        }
+      } catch (err) {
+        if (document.body.contains(container)) document.body.removeChild(container);
+        console.log('Web Share fallback to wa.me URL:', err);
+      }
+    }
+
+    const waUrl = formattedPhone
+      ? `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(messageText)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+
+    window.open(waUrl, '_blank');
   };
 
   return (
@@ -883,6 +982,13 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
               
               <button className="btn-demo" onClick={downloadPDF} style={{ flex: 1, padding: '12px', color: '#0f172a', border: '1px solid #cbd5e1', background: '#ffffff', fontWeight: 700 }}>
                 Download PDF
+              </button>
+
+              <button 
+                onClick={() => shareWhatsApp(completedBill)}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', color: '#ffffff', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 2px 6px rgba(37, 211, 102, 0.3)' }}
+              >
+                <MessageSquare size={18} /> Share WhatsApp
               </button>
             </div>
           </div>
