@@ -1115,6 +1115,7 @@ body {
   .mobile-toggle,
   .mobile-overlay,
   .no-print,
+  .no-print *,
   button,
   .btn-primary,
   .btn-demo,
@@ -1132,7 +1133,14 @@ body {
     visibility: visible !important;
   }
 
-  /* 4. Position printable-invoice to fill full A4 width without borders or headers/footers */
+  /* 4. Strictly hide any printable-invoice inside a .no-print container to prevent duplicate 2nd page */
+  .no-print .printable-invoice,
+  .no-print .printable-invoice * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* 5. Position printable-invoice to fill full A4 width without borders or page breaks */
   .printable-invoice {
     position: absolute !important;
     left: 0 !important;
@@ -1146,7 +1154,10 @@ body {
     box-shadow: none !important;
     background: #ffffff !important;
     display: block !important;
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 }
 
