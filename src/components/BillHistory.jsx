@@ -89,7 +89,7 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* 1. TOP TITLE & HEADER CARD */}
-      <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="no-print" style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', margin: 0 }}>Bill History</h1>
             <span style={{ fontSize: '12px', fontWeight: 700, background: '#fef2f2', color: '#991b1b', border: '1px solid #fecdd3', padding: '2px 10px', borderRadius: '12px' }}>
@@ -99,7 +99,7 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
       </div>
 
       {/* 2. SEARCH & NEAT TABLE CARD */}
-      <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <div className="no-print" style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
         
         {/* Search Bar */}
         <div style={{ position: 'relative', marginBottom: '18px', maxWidth: '480px' }}>
