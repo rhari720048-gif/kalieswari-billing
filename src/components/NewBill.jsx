@@ -275,36 +275,14 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
   };
 
   const downloadPDF = async () => {
-    const billToDownload = completedBill || {
-      billNo,
-      billDate: `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
-      customerName: customerName || 'Walk-in Customer',
-      customerPhone,
-      customerAddress,
-      items: cart,
-      paymentMode,
-      subtotal: totalMRP,
-      discountTotal: totalDiscount,
-      grandTotal: grandTotal,
-      status: 'Paid'
-    };
-    await downloadInvoicePDF(billToDownload, `Bill_${billToDownload.billNo || billNo}.pdf`);
+    const sourceEl = (completedBill && document.getElementById('modal-invoice-document')) || document.getElementById('live-invoice-document') || document.querySelector('.printable-invoice');
+    if (!sourceEl) return;
+    await downloadInvoicePDF(sourceEl, `Bill_${completedBill?.bill_no || billNo}.pdf`);
   };
 
   const shareWhatsApp = async (billToShare) => {
-    const bill = billToShare || completedBill || {
-      billNo,
-      billDate: `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
-      customerName: customerName || 'Walk-in Customer',
-      customerPhone,
-      customerAddress,
-      items: cart,
-      paymentMode,
-      subtotal: totalMRP,
-      discountTotal: totalDiscount,
-      grandTotal: grandTotal,
-      status: 'Paid'
-    };
+    const bill = billToShare || completedBill;
+    if (!bill) return;
 
     const rawPhone = (bill.customer_phone || customerPhone || '').replace(/\D/g, '');
     let formattedPhone = rawPhone;
@@ -314,11 +292,11 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
 
     const shopSettings = getShopSettings();
     const shopName = shopSettings.shopName || 'Kalieswari Crackers & Fireworks';
-    const bNo = bill.billNo || bill.bill_no || billNo;
-    const custName = bill.customerName || bill.customer_name || customerName || 'Walk-in Customer';
-    const grandTotalVal = Number(bill.grandTotal || bill.grand_total || (totalMRP - totalDiscount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const bNo = bill.bill_no || billNo;
+    const custName = bill.customer_name || customerName || 'Walk-in Customer';
+    const grandTotalVal = Number(bill.grand_total || totalNetPayable || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const itemsCount = bill.items ? bill.items.length : cart.length;
-    const billDateStr = bill.billDate || bill.created_at || `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+    const billDateStr = bill.created_at || `${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
 
     let messageText = `*${shopName}*\n`;
     messageText += `------------------------------------\n`;
@@ -328,7 +306,7 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
     messageText += `*Customer:* ${custName}\n`;
     messageText += `*Total Items:* ${itemsCount}\n`;
     messageText += `*Net Total Amount:* ₹${grandTotalVal}\n`;
-    messageText += `*Payment Mode:* ${paymentMode || bill.paymentMode || bill.payment_mode || 'Cash'}\n`;
+    messageText += `*Payment Mode:* ${paymentMode || bill.payment_mode || 'Cash'}\n`;
     messageText += `*Status:* ${bill.status || 'Paid'}\n`;
     messageText += `------------------------------------\n`;
     messageText += `Thank you for your business! 🎉\n`;
@@ -336,9 +314,11 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
       messageText += `For support, call: ${shopSettings.phone}`;
     }
 
-    if (navigator.share && navigator.canShare) {
+    const sourceEl = document.getElementById('modal-invoice-document') || document.querySelector('.printable-invoice');
+
+    if (sourceEl && navigator.share && navigator.canShare) {
       try {
-        const pdf = createInvoicePDF(bill);
+        const pdf = await createInvoicePDF(sourceEl);
         if (pdf) {
           const pdfBlob = pdf.output('blob');
           const file = new File([pdfBlob], `Bill_${bNo}.pdf`, { type: 'application/pdf' });

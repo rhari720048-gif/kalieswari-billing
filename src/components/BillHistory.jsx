@@ -16,8 +16,9 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
   );
 
   const downloadPDF = async () => {
-    if (!selectedBill) return;
-    await downloadInvoicePDF(selectedBill, `Bill_${selectedBill.bill_no}.pdf`);
+    const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
+    if (!sourceEl || !selectedBill) return;
+    await downloadInvoicePDF(sourceEl, `Bill_${selectedBill.bill_no}.pdf`);
   };
 
   const shareWhatsApp = async (billToShare) => {
@@ -54,9 +55,11 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
       messageText += `For support, call: ${shopSettings.phone}`;
     }
 
-    if (navigator.share && navigator.canShare) {
+    const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
+
+    if (sourceEl && navigator.share && navigator.canShare) {
       try {
-        const pdf = createInvoicePDF(bill);
+        const pdf = await createInvoicePDF(sourceEl);
         if (pdf) {
           const pdfBlob = pdf.output('blob');
           const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
