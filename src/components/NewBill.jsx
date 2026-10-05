@@ -822,26 +822,28 @@ export default function NewBill({ products, bills = [], onBillCreated, initialCu
         </div>
 
         {/* Right Side: Live Invoice Preview Bill */}
-        <div className={showReceiptModal ? "no-print" : ""} style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div style={{ background: '#ffffff', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', margin: '0 0 12px 0' }}>
             Live Invoice Preview
           </h3>
 
-          <InvoiceDocument
-            id="live-invoice-document"
-            billNo={billNo}
-            billDate={`${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`}
-            customerName={customerName}
-            customerPhone={customerPhone}
-            customerAddress={customerAddress}
-            items={cart}
-            paymentMode={paymentMode}
-            subtotal={totalMRP}
-            discountTotal={totalDiscount}
-            grandTotal={grandTotal}
-            status="Paid"
-            isLivePreview={true}
-          />
+          {!showReceiptModal && (
+            <InvoiceDocument
+              id="live-invoice-document"
+              billNo={billNo}
+              billDate={`${billDate} • ${liveTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`}
+              customerName={customerName}
+              customerPhone={customerPhone}
+              customerAddress={customerAddress}
+              items={cart}
+              paymentMode={paymentMode}
+              subtotal={totalMRP}
+              discountTotal={totalDiscount}
+              grandTotal={grandTotal}
+              status="Paid"
+              isLivePreview={true}
+            />
+          )}
         </div>
       </div>
 
