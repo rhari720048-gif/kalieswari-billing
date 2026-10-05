@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Search, Printer, Eye, Phone, Calendar, X, Receipt, CheckCircle, FileText, Trash2, AlertTriangle, MessageSquare } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import InvoiceDocument from './InvoiceDocument';
 import { getShopSettings } from '../utils/storage';
+import { createInvoicePDF, downloadInvoicePDF } from '../utils/pdfGenerator';
 
 export default function BillHistory({ bills = [], onDeleteBill }) {
   const [search, setSearch] = useState('');
@@ -19,49 +18,7 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
   const downloadPDF = async () => {
     const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
     if (!sourceEl || !selectedBill) return;
-
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
-    container.style.width = '800px';
-    container.style.background = '#ffffff';
-    container.style.zIndex = '-9999';
-
-    const clone = sourceEl.cloneNode(true);
-    clone.style.width = '800px';
-    clone.style.maxWidth = '800px';
-    clone.style.margin = '0 auto';
-    clone.style.padding = '24px 28px';
-    clone.style.boxSizing = 'border-box';
-
-    container.appendChild(clone);
-    document.body.appendChild(container);
-
-    try {
-      const canvas = await html2canvas(clone, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        width: 800,
-        windowWidth: 800
-      });
-
-      document.body.removeChild(container);
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Bill_${selectedBill.bill_no}.pdf`);
-    } catch (err) {
-      if (document.body.contains(container)) document.body.removeChild(container);
-      console.error('Error generating PDF:', err);
-    }
+    await downloadInvoicePDF(sourceEl, `Bill_${selectedBill.bill_no}.pdf`);
   };
 
   const shareWhatsApp = async (billToShare) => {
@@ -101,56 +58,22 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
     const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
 
     if (sourceEl && navigator.share && navigator.canShare) {
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.width = '800px';
-      container.style.background = '#ffffff';
-      container.style.zIndex = '-9999';
-
-      const clone = sourceEl.cloneNode(true);
-      clone.style.width = '800px';
-      clone.style.maxWidth = '800px';
-      clone.style.margin = '0 auto';
-      clone.style.padding = '24px 28px';
-      clone.style.boxSizing = 'border-box';
-
-      container.appendChild(clone);
-      document.body.appendChild(container);
-
       try {
-        const canvas = await html2canvas(clone, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          width: 800,
-          windowWidth: 800
-        });
+        const pdf = await createInvoicePDF(sourceEl);
+        if (pdf) {
+          const pdfBlob = pdf.output('blob');
+          const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
 
-        document.body.removeChild(container);
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        const pdfBlob = pdf.output('blob');
-        const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
-
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: `Bill ${billNo}`,
-            text: messageText,
-            files: [file]
-          });
-          return;
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `Bill ${billNo}`,
+              text: messageText,
+              files: [file]
+            });
+            return;
+          }
         }
       } catch (err) {
-        if (document.body.contains(container)) document.body.removeChild(container);
         console.log('Web Share fallback to wa.me URL:', err);
       }
     }
