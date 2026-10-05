@@ -21,66 +21,30 @@ export default function BillHistory({ bills = [], onDeleteBill }) {
     await downloadInvoicePDF(sourceEl, `Bill_${selectedBill.bill_no}.pdf`);
   };
 
-  const shareWhatsApp = async (billToShare) => {
+  const shareWhatsApp = (billToShare) => {
     const bill = billToShare || selectedBill;
-    if (!bill) return;
+    let rawPhone = (bill?.customer_phone || '');
+    let digits = rawPhone.replace(/\D/g, '');
 
-    const rawPhone = (bill.customer_phone || '').replace(/\D/g, '');
-    let formattedPhone = rawPhone;
-    if (rawPhone.length === 10) {
-      formattedPhone = '91' + rawPhone;
+    if (!digits) {
+      const entered = window.prompt('Enter customer WhatsApp number:');
+      if (!entered) return;
+      digits = entered.replace(/\D/g, '');
     }
 
-    const shopSettings = getShopSettings();
-    const shopName = shopSettings.shopName || 'Kalieswari Crackers & Fireworks';
-    const billNo = bill.bill_no || '';
-    const custName = bill.customer_name || 'Walk-in Customer';
-    const grandTotal = Number(bill.grand_total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const itemsCount = bill.items ? bill.items.length : 0;
-    const billDate = bill.created_at || 'Recent';
-
-    let messageText = `*${shopName}*\n`;
-    messageText += `------------------------------------\n`;
-    messageText += `🧾 *INVOICE / BILL RECEIPT*\n`;
-    messageText += `*Bill No:* ${billNo}\n`;
-    messageText += `*Date:* ${billDate}\n`;
-    messageText += `*Customer:* ${custName}\n`;
-    messageText += `*Total Items:* ${itemsCount}\n`;
-    messageText += `*Net Total Amount:* ₹${grandTotal}\n`;
-    messageText += `*Payment Mode:* ${bill.payment_mode || 'Cash'}\n`;
-    messageText += `*Status:* ${bill.status || 'Paid'}\n`;
-    messageText += `------------------------------------\n`;
-    messageText += `Thank you for your business! 🎉\n`;
-    if (shopSettings.phone) {
-      messageText += `For support, call: ${shopSettings.phone}`;
+    if (digits.length === 11 && digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+    if (digits.length === 10) {
+      digits = '91' + digits;
     }
 
-    const sourceEl = document.getElementById('history-modal-invoice-document') || document.querySelector('.printable-invoice');
+    if (!digits) return;
 
-    if (sourceEl && navigator.share && navigator.canShare) {
-      try {
-        const pdf = await createInvoicePDF(sourceEl);
-        if (pdf) {
-          const pdfBlob = pdf.output('blob');
-          const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
-
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: `Bill ${billNo}`,
-              text: messageText,
-              files: [file]
-            });
-            return;
-          }
-        }
-      } catch (err) {
-        console.log('Web Share fallback to wa.me URL:', err);
-      }
-    }
-
-    const waUrl = formattedPhone
-      ? `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(messageText)}`
-      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+    const waUrl = isMobile
+      ? `https://api.whatsapp.com/send?phone=${digits}`
+      : `https://web.whatsapp.com/send?phone=${digits}`;
 
     window.open(waUrl, '_blank');
   };
