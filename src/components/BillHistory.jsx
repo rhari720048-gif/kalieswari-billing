@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Printer, Eye, Phone, Calendar, X, Receipt, CheckCircle, FileText } from 'lucide-react';
+import { Search, Printer, Eye, Phone, Calendar, X, Receipt, CheckCircle, FileText, Trash2, AlertTriangle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import InvoiceDocument from './InvoiceDocument';
 
-export default function BillHistory({ bills = [] }) {
+export default function BillHistory({ bills = [], onDeleteBill }) {
   const [search, setSearch] = useState('');
   const [selectedBill, setSelectedBill] = useState(null);
+  const [billToDelete, setBillToDelete] = useState(null);
 
   const filteredBills = bills.filter(b => 
     (b.bill_no && b.bill_no.toLowerCase().includes(search.toLowerCase())) ||
@@ -158,25 +159,47 @@ export default function BillHistory({ bills = [] }) {
                       {bill.created_at || 'Recent'}
                     </td>
                     <td style={{ padding: '14px', textAlign: 'right' }}>
-                      <button
-                        onClick={() => setSelectedBill(bill)}
-                        style={{
-                          padding: '6px 14px',
-                          borderRadius: '6px',
-                          border: '1px solid #cbd5e1',
-                          background: '#ffffff',
-                          color: '#991b1b',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                        }}
-                      >
-                        <Eye size={14} /> View Bill
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button
+                          onClick={() => setSelectedBill(bill)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            background: '#ffffff',
+                            color: '#991b1b',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                          }}
+                        >
+                          <Eye size={14} /> View Bill
+                        </button>
+
+                        <button
+                          onClick={() => setBillToDelete(bill)}
+                          title="Delete Bill"
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #fecdd3',
+                            background: '#fef2f2',
+                            color: '#dc2626',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Trash2 size={14} /> Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -244,6 +267,42 @@ export default function BillHistory({ bills = [] }) {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* SCREEN CENTER CONFIRMATION TOAST MODAL FOR DELETING BILL */}
+      {billToDelete && (
+        <div className="modal-overlay" style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(3px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#ffffff', padding: '26px 28px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', width: '90%', maxWidth: '420px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
+            <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px auto', border: '1px solid #fecdd3' }}>
+              <AlertTriangle size={26} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>Are you sure?</h3>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+              Are you sure you want to delete bill <strong style={{ color: '#0f172a' }}>{billToDelete.bill_no}</strong> ({billToDelete.customer_name || 'Walk-in Customer'})? This action will permanently remove the bill from the database.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setBillToDelete(null)}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteBill) {
+                    onDeleteBill(billToDelete.id || billToDelete.bill_no);
+                  }
+                  setBillToDelete(null);
+                }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: '#ffffff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)' }}
+              >
+                Yes, Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

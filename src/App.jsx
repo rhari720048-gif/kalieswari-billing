@@ -16,6 +16,7 @@ import {
   deleteProduct,
   getBills, 
   getBillsAsync,
+  deleteBill,
   getCustomers, 
   getCustomersAsync,
   saveCustomer, 
@@ -162,6 +163,11 @@ export default function App() {
     setRawCustomers(updated);
   };
 
+  const handleDeleteBill = (idOrBillNo) => {
+    const updated = deleteBill(idOrBillNo);
+    setRawBills(updated);
+  };
+
   const handleSelectCustomerForBill = (cust) => {
     setSelectedCustomerForBill(cust);
     handleTabChange('new-bill');
@@ -267,7 +273,7 @@ export default function App() {
           )}
 
           {activeTab === 'bill-history' && (
-            <BillHistory bills={bills} />
+            <BillHistory bills={bills} onDeleteBill={handleDeleteBill} />
           )}
 
           {activeTab === 'customers' && (
