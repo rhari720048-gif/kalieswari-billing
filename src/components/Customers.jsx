@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Phone, Search, User, History, X, Receipt } from 'lucide-react';
+import { Plus, Phone, Search, User, History, X, Receipt, Trash2, AlertTriangle } from 'lucide-react';
 
-export default function Customers({ customers = [], onAddCustomer, onSelectCustomerForBill, bills = [] }) {
+export default function Customers({ customers = [], onAddCustomer, onSelectCustomerForBill, onDeleteCustomer, bills = [] }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -12,6 +12,9 @@ export default function Customers({ customers = [], onAddCustomer, onSelectCusto
 
   // Selected customer for viewing history modal
   const [selectedCustHistory, setSelectedCustHistory] = useState(null);
+
+  // Selected customer for delete confirmation toast modal
+  const [customerToDelete, setCustomerToDelete] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -171,6 +174,26 @@ export default function Customers({ customers = [], onAddCustomer, onSelectCusto
                           }}
                         >
                           New Bill
+                        </button>
+
+                        <button
+                          onClick={() => setCustomerToDelete(c)}
+                          title="Delete Customer"
+                          style={{
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #fecdd3',
+                            background: '#fef2f2',
+                            color: '#dc2626',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Trash2 size={14} /> Delete
                         </button>
                       </div>
                     </td>
@@ -342,6 +365,42 @@ export default function Customers({ customers = [], onAddCustomer, onSelectCusto
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* SCREEN CENTER CONFIRMATION TOAST MODAL FOR DELETING CUSTOMER */}
+      {customerToDelete && (
+        <div className="modal-overlay" style={{ background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(3px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#ffffff', padding: '26px 28px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', width: '90%', maxWidth: '420px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
+            <div style={{ width: '54px', height: '54px', borderRadius: '50%', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px auto', border: '1px solid #fecdd3' }}>
+              <AlertTriangle size={26} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>Are you sure?</h3>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+              Are you sure you want to delete customer <strong style={{ color: '#0f172a' }}>{customerToDelete.name}</strong> ({customerToDelete.phone || 'No phone'})? This action will permanently remove the customer from the database.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setCustomerToDelete(null)}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteCustomer) {
+                    onDeleteCustomer(customerToDelete.id || customerToDelete.phone || customerToDelete.name);
+                  }
+                  setCustomerToDelete(null);
+                }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: '#ffffff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)' }}
+              >
+                Yes, Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Lock, ArrowRight, Calendar } from 'lucide-react';
-import { getFinancialYears, getShopSettings } from '../utils/storage';
+import { getFinancialYears, getShopSettings, getAdminCredentials, getAdminCredentialsAsync } from '../utils/storage';
 
 export default function Login({ onLoginSuccess }) {
   const shopSettings = getShopSettings();
@@ -12,14 +12,30 @@ export default function Login({ onLoginSuccess }) {
   });
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    // Sync latest credentials from TiDB database on mount
+    getAdminCredentialsAsync();
+  }, []);
+
   const handleLogin = (e) => {
     e.preventDefault();
     setError('');
 
     localStorage.setItem('kalieswari_financial_year', selectedYear);
 
-    if (email.trim() === 'admin@gmail.com' && password === 'admin@123') {
-      onLoginSuccess({ id: 1, username: 'admin@gmail.com', name: 'Kalieswari Admin', role: 'Admin / Cashier', financialYear: selectedYear });
+    const validCreds = getAdminCredentials();
+
+    if (
+      email.trim().toLowerCase() === validCreds.email.trim().toLowerCase() && 
+      password === validCreds.password
+    ) {
+      onLoginSuccess({ 
+        id: 1, 
+        username: validCreds.email, 
+        name: shopSettings.shopName || 'Kalieswari Admin', 
+        role: 'Admin / Cashier', 
+        financialYear: selectedYear 
+      });
     } else {
       setError('Invalid email or password');
     }

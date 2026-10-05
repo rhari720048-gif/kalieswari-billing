@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Store, Phone, MapPin, Receipt, CheckCircle, Calendar, Plus, Trash2, AlertTriangle, RotateCcw } from 'lucide-react';
-import { getFinancialYears, saveFinancialYear, deleteFinancialYear, getShopSettings, saveShopSettings, resetYearData } from '../utils/storage';
+import { Save, Store, Phone, MapPin, Receipt, CheckCircle, Calendar, Plus, Trash2, AlertTriangle, RotateCcw, Mail, Lock, KeyRound } from 'lucide-react';
+import { getFinancialYears, saveFinancialYear, deleteFinancialYear, getShopSettings, saveShopSettings, resetYearData, getAdminCredentials, getAdminCredentialsAsync, saveAdminCredentials } from '../utils/storage';
 
 export default function Settings({ onUpdateShopSettings, financialYear = '2026', onResetSuccess }) {
   const [initialSettings] = useState(() => getShopSettings());
@@ -9,6 +9,32 @@ export default function Settings({ onUpdateShopSettings, financialYear = '2026',
   const [address, setAddress] = useState(initialSettings.address);
   const [gstin, setGSTIN] = useState(initialSettings.gstin);
   const [saved, setSaved] = useState(false);
+
+  // Admin credentials state
+  const [initialCreds] = useState(() => getAdminCredentials());
+  const [adminEmail, setAdminEmail] = useState(initialCreds.email);
+  const [adminPassword, setAdminPassword] = useState(initialCreds.password);
+  const [credSavedMsg, setCredSavedMsg] = useState('');
+
+  useEffect(() => {
+    getAdminCredentialsAsync().then(creds => {
+      if (creds && creds.email) {
+        setAdminEmail(creds.email);
+        setAdminPassword(creds.password);
+      }
+    });
+  }, []);
+
+  const handleSaveCredentials = (e) => {
+    e.preventDefault();
+    if (!adminEmail || !adminPassword) return;
+    saveAdminCredentials({
+      email: adminEmail,
+      password: adminPassword
+    });
+    setCredSavedMsg('Login Gmail ID & Password updated successfully! Please use new credentials on next login.');
+    setTimeout(() => setCredSavedMsg(''), 4000);
+  };
 
   // Financial Years state
   const [yearsList, setYearsList] = useState(() => getFinancialYears());
@@ -138,6 +164,66 @@ export default function Settings({ onUpdateShopSettings, financialYear = '2026',
             style={{ padding: '12px 20px', background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px', boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)' }}
           >
             <Save size={18} /> Save Changes
+          </button>
+        </form>
+      </div>
+
+      {/* 2. GMAIL & PASSWORD CHANGE CARD */}
+      <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <KeyRound size={20} color="#dc2626" />
+          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+            Login Credentials (மின்னஞ்சல் & கடவுச்சொல் மாற்றுதல்)
+          </h3>
+        </div>
+        <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px 0' }}>
+          Change Gmail ID and Password used for logging into the billing system.
+        </p>
+
+        {credSavedMsg && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecdd3', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle size={16} /> {credSavedMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSaveCredentials} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px', display: 'block' }}>Login Gmail / Email ID</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Mail size={18} style={{ position: 'absolute', left: '12px', color: '#991b1b' }} />
+                <input
+                  type="email"
+                  required
+                  value={adminEmail}
+                  onChange={e => setAdminEmail(e.target.value)}
+                  placeholder="admin@gmail.com"
+                  style={{ width: '100%', padding: '10px 12px 10px 38px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a', fontSize: '13px', fontWeight: 600, outline: 'none' }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px', display: 'block' }}>New Password</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#991b1b' }} />
+                <input
+                  type="text"
+                  required
+                  value={adminPassword}
+                  onChange={e => setAdminPassword(e.target.value)}
+                  placeholder="admin@123"
+                  style={{ width: '100%', padding: '10px 12px 10px 38px', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a', fontSize: '13px', fontWeight: 600, outline: 'none' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            style={{ padding: '11px 20px', background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)', width: 'max-content' }}
+          >
+            <Save size={16} /> Update Login Credentials
           </button>
         </form>
       </div>

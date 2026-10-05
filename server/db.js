@@ -93,9 +93,18 @@ export async function initDatabase() {
         phone VARCHAR(50) DEFAULT '+91 98765 43210',
         gstin VARCHAR(50) DEFAULT '33ABCDE1234F1Z5',
         address TEXT,
+        admin_email VARCHAR(255) DEFAULT 'admin@gmail.com',
+        admin_password VARCHAR(255) DEFAULT 'admin@123',
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    try {
+      await connection.query(`ALTER TABLE settings ADD COLUMN admin_email VARCHAR(255) DEFAULT 'admin@gmail.com';`);
+    } catch (e) {}
+    try {
+      await connection.query(`ALTER TABLE settings ADD COLUMN admin_password VARCHAR(255) DEFAULT 'admin@123';`);
+    } catch (e) {}
 
     // Ensure default row exists
     const [settingsRows] = await connection.query('SELECT COUNT(*) as cnt FROM settings');

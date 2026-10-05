@@ -19,6 +19,7 @@ import {
   getCustomers, 
   getCustomersAsync,
   saveCustomer, 
+  deleteCustomer,
   getDashboardStats,
   getDashboardStatsAsync,
   getFinancialYears,
@@ -32,12 +33,12 @@ export default function App() {
     return localStorage.getItem('kalieswari_financial_year') || '2026';
   });
 
-  // Persist authentication state in localStorage so refresh stays logged in for valid admin@gmail.com!
+  // Persist authentication state in localStorage so refresh stays logged in
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('kalieswari_user');
     try {
       const parsed = saved ? JSON.parse(saved) : null;
-      if (parsed && parsed.username === 'admin@gmail.com') {
+      if (parsed && parsed.username) {
         return parsed;
       }
       return null;
@@ -50,7 +51,7 @@ export default function App() {
     const savedUser = localStorage.getItem('kalieswari_user');
     try {
       const parsed = savedUser ? JSON.parse(savedUser) : null;
-      return localStorage.getItem('kalieswari_auth') === 'true' && parsed?.username === 'admin@gmail.com';
+      return localStorage.getItem('kalieswari_auth') === 'true' && Boolean(parsed?.username);
     } catch (e) {
       return false;
     }
@@ -153,6 +154,11 @@ export default function App() {
 
   const handleAddCustomer = (newCust) => {
     const updated = saveCustomer(newCust);
+    setRawCustomers(updated);
+  };
+
+  const handleDeleteCustomer = (idOrPhoneOrName) => {
+    const updated = deleteCustomer(idOrPhoneOrName);
     setRawCustomers(updated);
   };
 
@@ -269,6 +275,7 @@ export default function App() {
               customers={customers} 
               bills={bills}
               onAddCustomer={handleAddCustomer} 
+              onDeleteCustomer={handleDeleteCustomer}
               onSelectCustomerForBill={handleSelectCustomerForBill}
             />
           )}

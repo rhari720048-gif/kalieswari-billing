@@ -229,6 +229,21 @@ export const saveCustomer = (cust) => {
   return updated;
 };
 
+export const deleteCustomer = (idOrPhoneOrName) => {
+  const customers = getCustomers().filter(c => 
+    c.id !== idOrPhoneOrName && 
+    c.phone !== idOrPhoneOrName && 
+    c.name !== idOrPhoneOrName
+  );
+  localStorage.setItem(KEYS.CUSTOMERS, JSON.stringify(customers));
+
+  fetchAPI(`/customers/${encodeURIComponent(idOrPhoneOrName)}`, { method: 'DELETE' }).then(() => {
+    getCustomersAsync();
+  });
+
+  return customers;
+};
+
 // ---------------- DASHBOARD STATS ----------------
 export const getDashboardStats = () => {
   const bills = getBills();
@@ -361,5 +376,54 @@ export const resetYearData = (year) => {
   });
 
   return remainingBills;
+};
+
+// ---------------- ADMIN CREDENTIALS MANAGEMENT ----------------
+const DEFAULT_USER_CREDENTIALS = {
+  email: 'admin@gmail.com',
+  password: 'admin@123'
+};
+
+export const getAdminCredentials = () => {
+  const saved = localStorage.getItem('kalieswari_admin_credentials');
+  if (!saved) return DEFAULT_USER_CREDENTIALS;
+  try {
+    const parsed = JSON.parse(saved);
+    return {
+      email: parsed.email || DEFAULT_USER_CREDENTIALS.email,
+      password: parsed.password || DEFAULT_USER_CREDENTIALS.password
+    };
+  } catch (e) {
+    return DEFAULT_USER_CREDENTIALS;
+  }
+};
+
+export const getAdminCredentialsAsync = async () => {
+  const data = await fetchAPI('/settings/credentials');
+  if (data && data.email && data.password) {
+    const creds = { email: data.email, password: data.password };
+    localStorage.setItem('kalieswari_admin_credentials', JSON.stringify(creds));
+    return creds;
+  }
+  return getAdminCredentials();
+};
+
+export const saveAdminCredentials = (credentials) => {
+  const formatted = {
+    email: credentials.email ? credentials.email.trim() : DEFAULT_USER_CREDENTIALS.email,
+    password: credentials.password || DEFAULT_USER_CREDENTIALS.password
+  };
+  localStorage.setItem('kalieswari_admin_credentials', JSON.stringify(formatted));
+
+  fetchAPI('/settings/credentials', {
+    method: 'POST',
+    body: JSON.stringify(formatted)
+  }).then(saved => {
+    if (saved) {
+      getAdminCredentialsAsync();
+    }
+  });
+
+  return formatted;
 };
 

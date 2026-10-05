@@ -89,6 +89,17 @@ app.post('/api/customers', async (req, res) => {
   }
 });
 
+// Delete customer
+app.delete('/api/customers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM customers WHERE id = ? OR phone = ? OR name = ?', [id, id, id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ---------------- BILLS ----------------
 // Get all bills
 app.get('/api/bills', async (req, res) => {
@@ -270,6 +281,41 @@ app.post('/api/settings', async (req, res) => {
     res.json({ shopName, phone, gstin, address });
   } catch (err) {
     console.error('Error saving settings:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get admin credentials
+app.get('/api/settings/credentials', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT admin_email, admin_password FROM settings WHERE id = 1');
+    if (rows.length > 0 && rows[0].admin_email) {
+      res.json({
+        email: rows[0].admin_email,
+        password: rows[0].admin_password
+      });
+    } else {
+      res.json({
+        email: 'admin@gmail.com',
+        password: 'admin@123'
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update admin credentials
+app.post('/api/settings/credentials', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    await pool.query(
+      `UPDATE settings SET admin_email = ?, admin_password = ? WHERE id = 1`,
+      [email || 'admin@gmail.com', password || 'admin@123']
+    );
+    res.json({ email, password });
+  } catch (err) {
+    console.error('Error saving admin credentials:', err);
     res.status(500).json({ error: err.message });
   }
 });
