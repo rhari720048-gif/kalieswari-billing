@@ -32,17 +32,27 @@ export default function App() {
     return localStorage.getItem('kalieswari_financial_year') || '2026';
   });
 
-  // Persist authentication state in localStorage so refresh stays logged in!
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('kalieswari_auth') === 'true';
-  });
-
+  // Persist authentication state in localStorage so refresh stays logged in for valid admin@gmail.com!
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('kalieswari_user');
     try {
-      return saved ? JSON.parse(saved) : null;
+      const parsed = saved ? JSON.parse(saved) : null;
+      if (parsed && parsed.username === 'admin@gmail.com') {
+        return parsed;
+      }
+      return null;
     } catch (e) {
       return null;
+    }
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const savedUser = localStorage.getItem('kalieswari_user');
+    try {
+      const parsed = savedUser ? JSON.parse(savedUser) : null;
+      return localStorage.getItem('kalieswari_auth') === 'true' && parsed?.username === 'admin@gmail.com';
+    } catch (e) {
+      return false;
     }
   });
 

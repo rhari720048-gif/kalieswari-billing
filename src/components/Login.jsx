@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Sparkles, User, Lock, ArrowRight, ShieldCheck, Calendar } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Calendar } from 'lucide-react';
 import { getFinancialYears, getShopSettings } from '../utils/storage';
 
 export default function Login({ onLoginSuccess }) {
   const shopSettings = getShopSettings();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const availableYears = getFinancialYears();
   const [selectedYear, setSelectedYear] = useState(() => {
@@ -18,18 +18,11 @@ export default function Login({ onLoginSuccess }) {
 
     localStorage.setItem('kalieswari_financial_year', selectedYear);
 
-    if (username === 'admin' && (password === 'admin123' || password === 'admin')) {
-      onLoginSuccess({ id: 1, username: 'admin', name: 'Kalieswari Admin', role: 'Admin / Cashier', financialYear: selectedYear });
-    } else if (username && password) {
-      onLoginSuccess({ id: 2, username, name: username, role: 'Cashier', financialYear: selectedYear });
+    if (email.trim() === 'admin@gmail.com' && password === 'admin@123') {
+      onLoginSuccess({ id: 1, username: 'admin@gmail.com', name: 'Kalieswari Admin', role: 'Admin / Cashier', financialYear: selectedYear });
     } else {
-      setError('Please enter username and password');
+      setError('Invalid email or password');
     }
-  };
-
-  const handleQuickDemoLogin = () => {
-    localStorage.setItem('kalieswari_financial_year', selectedYear);
-    onLoginSuccess({ id: 1, username: 'admin', name: 'Kalieswari Admin', role: 'Admin / Cashier', financialYear: selectedYear });
   };
 
   return (
@@ -83,15 +76,14 @@ export default function Login({ onLoginSuccess }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Username</label>
+            <label className="form-label">Email</label>
             <div className="input-with-icon">
-              <User size={18} className="input-icon" />
+              <Mail size={18} className="input-icon" />
               <input
-                type="text"
+                type="email"
                 className="form-input"
-                placeholder="Enter username (admin)"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -104,7 +96,6 @@ export default function Login({ onLoginSuccess }) {
               <input
                 type="password"
                 className="form-input"
-                placeholder="Enter password (admin123)"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -115,14 +106,6 @@ export default function Login({ onLoginSuccess }) {
           <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)' }}>
             <span>Login to {selectedYear} Billing</span>
             <ArrowRight size={18} />
-          </button>
-
-          <div style={{ textAlign: 'center', margin: '8px 0', fontSize: '12px', color: '#64748b' }}>
-            OR
-          </div>
-
-          <button type="button" className="btn-demo" onClick={handleQuickDemoLogin}>
-            ⚡ Quick Demo Login ({selectedYear})
           </button>
         </form>
       </div>
