@@ -1096,7 +1096,7 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 10mm 10mm 10mm !important;
+    margin: 4mm 8mm 6mm 8mm !important;
   }
 
   /* Reset all parent containers so they do NOT restrict print height or force 1 page */
@@ -1161,7 +1161,7 @@ body {
     visibility: hidden !important;
   }
 
-  /* 5. Printable Invoice positioning for multi-page flow */
+  /* 5. Printable Invoice positioning right from top without empty space */
   .printable-invoice {
     position: relative !important;
     left: auto !important;
@@ -1169,7 +1169,7 @@ body {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
-    padding: 0 !important;
+    padding: 2mm 0mm 4mm 0mm !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -1179,6 +1179,12 @@ body {
     overflow: visible !important;
     page-break-inside: auto !important;
     break-inside: auto !important;
+  }
+
+  /* Compact brand logo header padding for clean top start */
+  .printable-invoice > div:first-child {
+    padding-bottom: 12px !important;
+    margin-bottom: 14px !important;
   }
 
   .printable-invoice table {
