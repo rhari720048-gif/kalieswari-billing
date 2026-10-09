@@ -118,10 +118,18 @@ app.get('/api/bills', async (req, res) => {
 app.post('/api/bills', async (req, res) => {
   try {
     const billData = req.body || {};
-    const [countRows] = await pool.query('SELECT COUNT(*) as count FROM bills');
-    const billCount = (countRows[0]?.count || 0) + 1;
-    const defaultBillNo = 'INV-' + String(billCount).padStart(2, '0');
-    const newBillNo = billData.bill_no || defaultBillNo;
+    const [allBills] = await pool.query('SELECT bill_no FROM bills');
+    const existingBillNos = new Set(allBills.map(b => b.bill_no));
+    const numbers = allBills.map(b => {
+      const match = String(b.bill_no || '').match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    }).filter(n => !isNaN(n) && n > 0);
+    const maxNum = numbers.length > 0 ? Math.max(0, ...numbers) : 0;
+
+    let newBillNo = billData.bill_no;
+    if (!newBillNo || existingBillNos.has(newBillNo)) {
+      newBillNo = `INV-${String(maxNum + 1).padStart(2, '0')}`;
+    }
     const grandTotal = Number(billData.grand_total || 0);
     const paidAmount = Number(billData.paid_amount || 0);
     const pendingAmount = Math.max(0, grandTotal - paidAmount);
@@ -195,7 +203,12 @@ app.post('/api/bills', async (req, res) => {
 // Delete bill
 app.delete('/api/bills/:id', async (req, res) => {
   try {
-    await pool.query('DELETE FROM bills WHERE id = ? OR bill_no = ?', [req.params.id, req.params.id]);
+    const param = req.params.id;
+    if (!isNaN(Number(param))) {
+      await pool.query('DELETE FROM bills WHERE id = ? OR bill_no = ?', [param, param]);
+    } else {
+      await pool.query('DELETE FROM bills WHERE bill_no = ?', [param]);
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -27,7 +27,17 @@ import { createInvoicePDF, downloadInvoicePDF } from '../utils/pdfGenerator';
 
 export default function NewBill({ products, bills = [], onBillCreated, initialCustomer }) {
   const generateNextBillNo = (billsList) => {
-    const nextNum = (billsList && Array.isArray(billsList) ? billsList.length : 0) + 1;
+    if (!billsList || !Array.isArray(billsList) || billsList.length === 0) {
+      return 'INV-01';
+    }
+    const numbers = billsList.map(b => {
+      if (!b || !b.bill_no) return 0;
+      const match = String(b.bill_no).match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    }).filter(n => !isNaN(n) && n > 0);
+
+    const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0;
+    const nextNum = maxNum + 1;
     return `INV-${String(nextNum).padStart(2, '0')}`;
   };
 

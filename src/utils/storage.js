@@ -117,7 +117,17 @@ export const getBillsAsync = async () => {
 
 export const saveBill = (billData) => {
   const bills = getBills();
-  const newBillNo = billData.bill_no || ('INV-' + Math.floor(100000 + Math.random() * 900000));
+  const existingBillNos = new Set(bills.map(b => b.bill_no));
+  const numbers = bills.map(b => {
+    const match = String(b.bill_no || '').match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
+  }).filter(n => !isNaN(n) && n > 0);
+  const maxNum = numbers.length > 0 ? Math.max(0, ...numbers) : 0;
+
+  let newBillNo = billData.bill_no;
+  if (!newBillNo || existingBillNos.has(newBillNo)) {
+    newBillNo = `INV-${String(maxNum + 1).padStart(2, '0')}`;
+  }
   const pending = Math.max(0, billData.grand_total - (billData.paid_amount || 0));
   
   const createdBill = {
